@@ -195,3 +195,13 @@ describe('audit log integrity', () => {
     await run(w.u.sysadmin, `select update_setting('preferences.max_active','5','revert')`)
   })
 })
+
+describe('helper RPCs', () => {
+  it('only event managers can list supervisors; only audit viewers can resolve actors', async () => {
+    const rows = (await run(w.u.coordinator, `select * from list_supervisors()`)).rows as { id: string }[]
+    expect(rows.map((r) => r.id)).toContain(w.u.supervisor)
+    expect((await run(w.u.A, `select * from list_supervisors()`)).rows.length).toBe(0)
+    expect((await run(w.u.A, `select * from actor_emails($1::uuid[])`, [[w.u.admin]])).rows.length).toBe(0)
+    expect((await run(w.u.auditor, `select * from actor_emails($1::uuid[])`, [[w.u.admin]])).rows.length).toBe(1)
+  })
+})

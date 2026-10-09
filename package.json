@@ -8,8 +8,10 @@
     "build": "tsc --noEmit && vite build && node scripts/spa-fallback.mjs",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:db": "vitest run tests/db"
+    "test": "vitest run --exclude tests/e2e",
+    "test:db": "vitest run tests/db",
+    "test:e2e": "VITE_SUPABASE_URL=http://localhost:54321 VITE_SUPABASE_ANON_KEY=test-anon-key npm run build && vitest run tests/e2e",
+    "test:all": "npm test && npm run test:e2e"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -33,6 +35,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "playwright-core": "^1.64.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",

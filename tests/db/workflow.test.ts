@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import { as, q } from './harness'
-import { buildWorld, assign, release, confirmed, attendanceOf, type World } from './fixture'
+import { buildWorld, assign, release, type World } from './fixture'
 
 let w: World
 beforeAll(async () => { w = await buildWorld() })
@@ -47,7 +47,7 @@ describe('assignment workflow & eligibility', () => {
     await run(w.u.A, `select respond_assignment($1,'accept')`, [id])
     expect(await status(id)).toBe('confirmed')
     expect((await q(w.db, 'select 1 from attendance_records where assignment_id=$1', [id])).length).toBe(1)
-    const hist = await q<{ to_status: string }>(w.db, 'select to_status from assignment_history where assignment_id=$1 order by created_at, id', [id])
+    const hist = await q<{ to_status: string }>(w.db, 'select to_status from assignment_history where assignment_id=$1 order by seq', [id])
     expect(hist.map((h) => h.to_status)).toEqual(['draft', 'offered', 'awaiting_volunteer_confirmation', 'confirmed'])
     const n = await q(w.db, `select 1 from notifications where user_id=$1 and title='New assignment offer'`, [w.u.A])
     expect(n.length).toBe(1)

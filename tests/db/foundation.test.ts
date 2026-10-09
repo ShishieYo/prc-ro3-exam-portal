@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest'
-import { createDb, as, q, fails, addUser, makeStaff, type Db } from './harness'
+import { createDb, q, addUser, type Db } from './harness'
 
 describe('foundation', () => {
   let db: Db

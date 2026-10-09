@@ -75,6 +75,7 @@ create trigger assignments_touch before update on assignments for each row execu
 
 create table assignment_history (
   id uuid primary key default gen_random_uuid(),
+  seq bigint generated always as identity,
   assignment_id uuid not null references assignments (id),
   from_status assignment_status,
   to_status assignment_status,

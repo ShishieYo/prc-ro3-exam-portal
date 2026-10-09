@@ -254,3 +254,16 @@ describe('management dashboard', () => {
     await expect(run(w.u.A, `select management_dashboard()`)).rejects.toThrow(/Not authorized/)
   })
 })
+
+describe('rule deactivation', () => {
+  it('requires the rule-management permission and a reason; keeps the row', async () => {
+    const id = (await q<{ id: string }>(w.db, `select id from cpd_rules where version=2`))[0].id
+    await expect(run(w.u.finance, `select deactivate_rule('cpd',$1,'x')`, [id])).rejects.toThrow(/Not authorized/)
+    await expect(run(w.u.cpd, `select deactivate_rule('cpd',$1,'')`, [id])).rejects.toThrow(/reason/)
+    await run(w.u.cpd, `select deactivate_rule('cpd',$1,'superseded')`, [id])
+    const r = (await q<{ active: boolean }>(w.db, `select active from cpd_rules where id=$1`, [id]))[0]
+    expect(r.active).toBe(false)
+    const log = await q<{ reason: string }>(w.db, `select reason from audit_logs where record_type='cpd_rules' and record_id=$1 and action='update'`, [id])
+    expect(log[0].reason).toBe('superseded')
+  })
+})
